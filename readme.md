@@ -27,7 +27,7 @@ python3 get_test_npy_data.py
 
     (2). Place coarse ('123_s3_fold*_1e6_avg_best.pth') and fine ('123_fold*_net2_s3_net1_avg_best.pth') segmentation models in  './test/pth_net_1/' and './test/pth_net_2_by_net1/'  directory, respectively.   
     
-    The decompression format is as follows:
+    The files format is as follows:
 ```
     /test/pth_net_1/
         123_s3_fold1_1e6_avg_best.pth
