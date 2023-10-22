@@ -10,9 +10,9 @@ Some important required packages include:
 
 ## Usages
 ### For test datasets
-1. First, you can download the dataset at [SegTHOR challenge][data link] and put them in './nii_41_60'. To save the dataset as ".npy", run:
+1. First, you can download the test datasets at [SegTHOR challenge][data link] and put them in './nii_41_60'. To save the dataset as ".npy", run:
 
-[data_link]:https://codalab.lisn.upsaclay.fr/competitions/843#learn_the_details
+[data link]:https://codalab.lisn.upsaclay.fr/competitions/843#learn_the_details
 ```
 cd ./utils/
 python3 get_test_npy_data.py
