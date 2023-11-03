@@ -32,7 +32,7 @@ python3 get_test_npy_data.py
     /test/pth_net_1/
         123_s3_fold1_1e6_avg_best.pth
         ...
-        23_s3_fold5_1e6_avg_best.npy
+        123_s3_fold5_1e6_avg_best.pth
     /test/pth_net_2_by_net1/
         123_fold1_net2_s3_net1_avg_best.pth
         ...
