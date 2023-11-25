@@ -24,7 +24,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-from fasunet_plus_2d import FAS_Unet_2d             
+from fasunet_plus_2d import FAS_Unet_plus_2d             
 
 
 class MyDataset_test(data.Dataset):
@@ -317,7 +317,7 @@ def model_init(model_path):
     numc = 64
     ivs = [[3, 3, 3, 3], [7], [4, 4, 4, 4]]
     
-    model = FAS_Unet_2d(in_channel = 1, 
+    model = FAS_Unet_plus_2d(in_channel = 1, 
                         channels = [64,64, 64, 64,64],
                         num_classes = args.num_classes, 
                         iter_num = [[3, 3, 3, 3], [7], [4, 4, 4, 4]]
