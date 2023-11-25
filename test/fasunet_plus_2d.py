@@ -3,9 +3,7 @@ import torch.nn as nn
 
 
 class New_iter(nn.Module):
-    '''
-        这样做, f, fi 都可以共享
-    '''
+
 
     def __init__(self, ker_f, ker_fi):
         super(New_iter, self).__init__()
@@ -29,9 +27,7 @@ class New_iter(nn.Module):
 
 
 class Ker_fi(nn.Module):
-    '''
-        要可以改变通道数
-    '''
+
     def __init__(self, channels, ks=3):
         super(Ker_fi, self).__init__()
 
@@ -69,15 +65,7 @@ class Ker_f(nn.Module):
 
 
 class Restriction(nn.Module):
-    """
-    限制过程: 把 u, f 的尺寸减小一半
-    计算 层和层 之间， u和f 的更新
-    f 根据公式更新， u 做池化
 
-    输入:u,f
-    输出:pool_u, new_f
-    f: F 算子
-    """
 
     def __init__(self, f_pre, f_next,in_channels, out_channels, ks=3):
         super(Restriction, self).__init__()
@@ -99,7 +87,7 @@ class Restriction(nn.Module):
         u, b = out
         del out
 
-        # u 的池化太简单
+        
         u_next = self.R_u(u)
 
         # update f follow:  pool(f) - pool( a_now(u) ) + a_next( pool(u_next) )
@@ -130,11 +118,7 @@ class Channels_fun(nn.Module):
 
 
 class Coarse_layer(nn.Module):
-    """
-        最下一层block, 迭代计算迭代计算 U
-        输入: u,f
-        输出: new_u
-    """
+
     def __init__(self, ker_f, channels, iter=7, Fi_ks=3):
         super(Coarse_layer, self).__init__()
         layers = []
@@ -154,11 +138,7 @@ class Coarse_layer(nn.Module):
 
 class Correction_u(nn.Module):
     """
-        提升过程
-        得到右边 迭代法中 u 的初值. u_{i^0}
-        误差的计算。减去左边的初值
-        输入: 三个变量
-        输出: 一个变量
+
     """
     def __init__(self, in_channels, out_channels, ks=3):
         super(Correction_u, self).__init__()
@@ -178,18 +158,18 @@ class Correction_u(nn.Module):
         return out
 
 
-class FAS_Unet_2d(nn.Module):
+class FAS_Unet_plus_2d(nn.Module):
     '''
         channels = [32, 64, 128, 256, 512] or
         channels = [64, 64, 64, 64, 64]
-        比 iter_num[0] 多一个
+        比 iter_num[0] 
     '''
     def __init__(self, in_channel, channels, num_classes,
                     iter_num = [[3,3,3,3], [7], [4,4,4,4]], 
                     F_ks=[3, 3, 3, 3,3], 
                     Fi_ks= [3, 3, 3, 3,3]):
-            # item_num[0], iter_num[2] 顺序一样，上到下
-        super(FAS_Unet_2d, self).__init__()
+            # item_num[0], iter_num[2] 
+        super(FAS_Unet_plus_2d, self).__init__()
 
         self.channels = channels
         self.conv_start = nn.Conv2d(in_channel, channels[0], 3,
@@ -197,19 +177,17 @@ class FAS_Unet_2d(nn.Module):
         self.bn_start = nn.BatchNorm2d(channels[0])
 
 
-        # 编码部分，所有的层堆叠起来
+
         ker_f = Ker_f(channels[0])
         for i in range(len(channels)-1):  # 0, 1, 2, 3
 
-            # 在 第 i 层， 把所有的快堆叠起来
+        
             layers = []
             for _ in range(iter_num[0][i]):
                 ker_fi = Ker_fi(channels=channels[i], ks=Fi_ks[i])
                 layers.append(New_iter(ker_f, ker_fi))
 
-            # 下面两个等价
-            # self.layer_1 =  nn.Sequential(*layers)
-            # 设置 self 中 名字为 layer_1 的属性为 nn.Sequential(*layers)
+
                                                                   
             setattr(self, 'left_layer_'+ str(i+1), nn.Sequential(*layers))
             Ker_f_next = Ker_f(channels[i+1])
@@ -222,11 +200,10 @@ class FAS_Unet_2d(nn.Module):
         self.coarse = Coarse_layer(ker_f, channels[i+1], iter_num[1][0], Fi_ks=Fi_ks[i])
 
 
-        # 解码
         
         for i in range(len(channels)-2, -1, -1):  # 3, 2, 1, 0
             # print(i)
-            ker_f = Ker_f(channels[i])  # 倒数第二个
+            ker_f = Ker_f(channels[i])  
             setattr(self, 'correction_u_'+ str(i+1), Correction_u(channels[i+1], channels[i]))
             # print(i, channels[i+1], channels[i])
 
@@ -245,7 +222,7 @@ class FAS_Unet_2d(nn.Module):
         b = self.bn_start(self.conv_start(b))
         out = (b, b)   # (u_1a, b)
 
-        # 下面两个等价
+
         # out = self.layer_1(out)  
         #out = getattr(self, 'layer_'+str(1))(out)
 
@@ -296,17 +273,17 @@ if __name__ == "__main__":
 
     f = torch.randn((1, in_channel, 32, 32))
 
-    model = FAS_Unet_2d(in_channel, channels, num_classes, iter_num=iter_num)
+    model = FAS_Unet_plus_2d(in_channel, channels, num_classes, iter_num=iter_num)
     # output1= model(f)
     # from torchsummaryX import summary
     
     # import pandas as pd
     
-    #显示所有列
+
     # pd.set_option('display.max_columns', None)
-    # #显示所有行
+
     # pd.set_option('display.max_rows', None)
-    # #设置value的显示长度为100，默认为50
+
     # pd.set_option('max_colwidth',100)
     # data = open("model.txt",'w',encoding="utf-8")
     # # print(summary(model, f), file=data)
@@ -316,10 +293,8 @@ if __name__ == "__main__":
 
     def count_parameters(model):
         """
-        统计模型参数数量
-        权重共享模式也可以计算的
         """
         return sum(p.numel() for p in model.parameters() if p.requires_grad)
         
-    print("模型参数数量：", count_parameters(model))
+    print("number of parameters ：", count_parameters(model))
     print('finish')
